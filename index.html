@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ПаркМесто — бронирование парковки</title>
+  <meta name="description" content="Выбор парковочного места на схеме, расчёт стоимости и бронирование.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="g-body" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#000" stop-opacity=".32"/>
+        <stop offset=".14" stop-color="#fff" stop-opacity=".22"/>
+        <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+        <stop offset=".86" stop-color="#fff" stop-opacity=".14"/>
+        <stop offset="1" stop-color="#000" stop-opacity=".36"/>
+      </linearGradient>
+      <radialGradient id="g-roof" cx=".38" cy=".3" r=".8">
+        <stop offset="0" stop-color="#fff" stop-opacity=".38"/>
+        <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000" stop-opacity=".2"/>
+      </radialGradient>
+      <linearGradient id="g-glass" x1="0" x2=".4" y1="0" y2="1">
+        <stop offset="0" stop-color="#5b6b82"/>
+        <stop offset=".35" stop-color="#2a3546"/>
+        <stop offset="1" stop-color="#151b26"/>
+      </linearGradient>
+    </defs>
+
+    <symbol id="car" viewBox="0 0 60 120">
+      <rect x="3" y="19" width="6" height="16" rx="2.5" fill="#14161b"/>
+      <rect x="51" y="19" width="6" height="16" rx="2.5" fill="#14161b"/>
+      <rect x="3" y="84" width="6" height="16" rx="2.5" fill="#14161b"/>
+      <rect x="51" y="84" width="6" height="16" rx="2.5" fill="#14161b"/>
+      <path d="M7.5 40 1.6 38.6Q.4 41.6 2 44.2L7.5 44.5Z" fill="currentColor" stroke="#000" stroke-opacity=".3" stroke-width=".7"/>
+      <path d="M52.5 40 58.4 38.6Q59.6 41.6 58 44.2L52.5 44.5Z" fill="currentColor" stroke="#000" stroke-opacity=".3" stroke-width=".7"/>
+      <path d="M17 3C24 1.5 36 1.5 43 3 51 4.5 54 9 54 18V102C54 111 51 116 43 117.5 36 118.7 24 118.7 17 117.5 9 116 6 111 6 102V18C6 9 9 4.5 17 3Z" fill="currentColor" stroke="#000" stroke-opacity=".3" stroke-width=".9"/>
+      <path d="M17 3C24 1.5 36 1.5 43 3 51 4.5 54 9 54 18V102C54 111 51 116 43 117.5 36 118.7 24 118.7 17 117.5 9 116 6 111 6 102V18C6 9 9 4.5 17 3Z" fill="url(#g-body)"/>
+      <path d="M21 6.2Q30 4.6 39 6.2" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/>
+      <path d="M17 13Q18.5 24 19.5 34M43 13Q41.5 24 40.5 34" fill="none" stroke="#000" stroke-opacity=".14" stroke-width=".9"/>
+      <path d="M9.6 9.5Q12 4.9 19.2 3.8L18.2 7.6Q13 8.6 10.6 12.4Z" fill="#eef3ff" stroke="#000" stroke-opacity=".25" stroke-width=".5"/>
+      <path d="M50.4 9.5Q48 4.9 40.8 3.8L41.8 7.6Q47 8.6 49.4 12.4Z" fill="#eef3ff" stroke="#000" stroke-opacity=".25" stroke-width=".5"/>
+      <path d="M10.5 37Q30 29 49.5 37L46 51Q30 47 14 51Z" fill="url(#g-glass)"/>
+      <path d="M14 33.6Q22 31 29 30.6" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M14 51Q30 47 46 51V86Q30 89 14 86Z" fill="currentColor"/>
+      <path d="M14 51Q30 47 46 51V86Q30 89 14 86Z" fill="url(#g-roof)"/>
+      <path d="M9 40 13 52V85L9 92Z" fill="url(#g-glass)"/>
+      <path d="M51 40 47 52V85L51 92Z" fill="url(#g-glass)"/>
+      <path d="M14 86Q30 89 46 86L48.5 98Q30 102.5 11.5 98Z" fill="url(#g-glass)"/>
+      <path d="M13 108.5Q30 111.5 47 108.5" fill="none" stroke="#000" stroke-opacity=".16" stroke-width=".9"/>
+      <path d="M8 109.5Q9 115 16 116.6L16.6 113.4Q11 112.4 8.6 105.5Z" fill="#c4122f"/>
+      <path d="M52 109.5Q51 115 44 116.6L43.4 113.4Q49 112.4 51.4 105.5Z" fill="#c4122f"/>
+    </symbol>
+
+    <symbol id="i-car" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 16v2.5M19 16v2.5M3.5 16h17v-4.2a2 2 0 0 0-.6-1.4L18 8.5 16.6 5.3A2 2 0 0 0 14.8 4H9.2a2 2 0 0 0-1.8 1.3L6 8.5l-1.9 1.9a2 2 0 0 0-.6 1.4Z M6 8.5h12M7 12.5h1.5M15.5 12.5H17"/></symbol>
+    <symbol id="i-wide" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M6.5 8.5 3 12l3.5 3.5M17.5 8.5 21 12l-3.5 3.5"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13 2 4.5 13.5H12L11 22l8.5-11.5H12Z"/></symbol>
+    <symbol id="i-roof" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 10 12 4l10 6M5 9v11M19 9v11"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5V10a2 2 0 0 0 0 4v2.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5V14a2 2 0 0 0 0-4Z"/></symbol>
+    <symbol id="i-parking" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 4h16v16H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 16V8h3a2.5 2.5 0 0 1 0 5h-3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M15 5 8 12l7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 11v5M12 8h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 7v6M12 16.5h.01"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-ruble" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M8 20V4h5.5a4 4 0 0 1 0 8H6M6 16h9"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></symbol>
+  </svg>
+
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash-scene">
+      <span class="splash-road"></span>
+      <span class="splash-bay"><b>P</b></span>
+      <span class="splash-car"><svg viewBox="0 0 60 120"><use href="#car"/></svg></span>
+    </div>
+    <p class="splash-name">ПаркМесто</p>
+    <span class="splash-bar"><span></span></span>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/park" aria-label="ПаркМесто — к выбору места">
+        <span class="brand-logo" aria-hidden="true">P</span>
+        <span class="brand-name">ПаркМесто</span>
+      </a>
+      <nav class="top-tabs" aria-label="Разделы">
+        <a href="#/park" data-tab="park"><svg class="ico" aria-hidden="true"><use href="#i-parking"/></svg>Парковка</a>
+        <a href="#/bookings" data-tab="bookings"><svg class="ico" aria-hidden="true"><use href="#i-ticket"/></svg>Мои брони<b class="count" data-count hidden>0</b></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app">
+    <section class="view" id="view-park" data-view="park" aria-labelledby="park-title">
+      <div class="park-layout">
+        <div class="park-main">
+          <div class="view-head">
+            <h1 id="park-title" tabindex="-1">Выберите место</h1>
+            <p class="view-sub"><svg class="ico" aria-hidden="true"><use href="#i-pin"/></svg>Парковка «Липовая аллея», ул. Садовая, 12</p>
+          </div>
+
+          <div class="filterbar" role="group" aria-label="Фильтры">
+            <div class="dd" id="price-dd">
+              <button type="button" class="chip chip--dd" id="price-btn" aria-expanded="false" aria-controls="price-menu" aria-haspopup="true">
+                <svg class="ico" aria-hidden="true"><use href="#i-ruble"/></svg><span id="price-btn-text">Цена</span><svg class="ico chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+              </button>
+              <div class="dd-menu" id="price-menu" role="group" aria-label="Цена за час" hidden>
+                <p class="dd-title">Цена за час</p>
+                <button type="button" class="dd-opt" data-price="0" aria-pressed="true"><span>Любая цена</span><small></small></button>
+                <button type="button" class="dd-opt" data-price="80" aria-pressed="false"><span>До 80 ₽</span><small></small></button>
+                <button type="button" class="dd-opt" data-price="120" aria-pressed="false"><span>До 120 ₽</span><small></small></button>
+              </div>
+            </div>
+            <span class="filterbar-sep" aria-hidden="true"></span>
+            <div class="chips chips--scroll" role="group" aria-label="Тип места" id="type-chips">
+              <button type="button" class="chip" data-type="standard" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-car"/></svg>Обычное</button>
+              <button type="button" class="chip" data-type="wide" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-wide"/></svg>Широкое</button>
+              <button type="button" class="chip" data-type="ev" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg>С зарядкой</button>
+              <button type="button" class="chip" data-type="covered" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-roof"/></svg>Крытое</button>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="switch" role="group" aria-label="Вид">
+              <button type="button" class="switch-btn" data-mode="map" aria-pressed="true"><svg class="ico" aria-hidden="true"><use href="#i-grid"/></svg>Схема</button>
+              <button type="button" class="switch-btn" data-mode="list" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-list"/></svg>Список</button>
+            </div>
+            <div class="result-wrap">
+              <p class="result" id="result" aria-live="polite"></p>
+              <button type="button" class="reset-chip" id="active-reset" hidden><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>Сбросить</button>
+            </div>
+          </div>
+
+          <div class="map-wrap" id="map-wrap">
+            <ul class="legend" aria-label="Обозначения">
+              <li><span class="lg lg-free" aria-hidden="true">A1</span>Свободно</li>
+              <li><span class="lg lg-sel" aria-hidden="true"><svg class="ico"><use href="#i-check"/></svg></span>Выбрано</li>
+              <li><span class="lg lg-car" aria-hidden="true"><svg viewBox="0 0 60 120" style="color:#565d69"><use href="#car"/></svg></span>Занято</li>
+              <li><span class="lg lg-car" aria-hidden="true"><svg viewBox="0 0 60 120" style="color:#1d5fe0"><use href="#car"/></svg></span>Ваша бронь</li>
+            </ul>
+            <div class="lot" role="group" aria-label="Схема парковки">
+              <div class="lot-row lot-row--a" id="row-a" role="group" aria-label="Ряд A"></div>
+              <div class="lane" aria-hidden="true">
+                <span class="lane-tag">A</span>
+                <span class="lane-line"></span>
+                <span class="lane-entry">Въезд</span>
+                <span class="lane-line"></span>
+                <span class="lane-tag">B</span>
+              </div>
+              <div class="lot-row lot-row--b" id="row-b" role="group" aria-label="Ряд B"></div>
+            </div>
+          </div>
+
+          <ul class="spot-list" id="spot-list" hidden></ul>
+
+          <div class="empty" id="filter-empty" hidden>
+            <p class="empty-title">Подходящих мест нет</p>
+            <p>Попробуйте другой тип места или цену.</p>
+            <button class="btn btn-secondary" type="button" id="filters-reset">Сбросить фильтры</button>
+          </div>
+        </div>
+
+        <aside class="side" aria-label="Выбранное место">
+          <div class="side-card" id="side-card"></div>
+        </aside>
+      </div>
+
+      <div class="cta-bar" id="cta-bar">
+        <div class="cta-info" id="cta-info"></div>
+        <button class="btn btn-primary" type="button" data-continue>Продолжить<svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></button>
+      </div>
+    </section>
+
+    <section class="view" id="view-checkout" data-view="checkout" aria-labelledby="checkout-title" hidden>
+      <div class="narrow">
+        <div class="view-head view-head--back">
+          <a class="back" href="#/park" aria-label="Назад к выбору места"><svg class="ico" aria-hidden="true"><use href="#i-back"/></svg></a>
+          <h1 id="checkout-title" tabindex="-1">Оформление</h1>
+        </div>
+
+        <div class="checkout-grid">
+          <div class="hero-card" id="hero-card"></div>
+
+          <form class="card form" id="booking-form" novalidate>
+            <div class="field">
+              <span class="label" id="unit-label">Тариф</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="unit-label">
+                <label><input type="radio" name="unit" value="hour" checked><span>По часам</span></label>
+                <label><input type="radio" name="unit" value="day"><span>По суткам</span></label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="qty" id="qty-label">Сколько часов</label>
+              <div class="stepper">
+                <button type="button" class="step" data-step="-1" aria-label="Уменьшить">−</button>
+                <input id="qty" name="qty" type="text" inputmode="numeric" autocomplete="off" value="2" aria-describedby="qty-hint qty-error">
+                <button type="button" class="step" data-step="1" aria-label="Увеличить">+</button>
+              </div>
+              <div class="quick" id="quick" role="group" aria-label="Быстрый выбор"></div>
+              <p class="hint" id="qty-hint"></p>
+              <p class="error" id="qty-error"></p>
+            </div>
+
+            <div class="period" aria-live="polite">
+              <div class="period-item">
+                <span class="period-label">Начало</span>
+                <b id="period-start">Сейчас</b>
+              </div>
+              <span class="period-arrow" aria-hidden="true"><svg class="ico"><use href="#i-next"/></svg></span>
+              <div class="period-item">
+                <span class="period-label">Окончание</span>
+                <b id="period-end">—</b>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="plate">Госномер автомобиля</label>
+              <input class="input input--plate" id="plate" name="plate" type="text" autocomplete="off" maxlength="12" placeholder="А123ВС 77" aria-describedby="plate-error">
+              <p class="error" id="plate-error"></p>
+            </div>
+
+            <div class="pay">
+              <div class="total" aria-live="polite">
+                <span class="total-label">Итого</span>
+                <span class="total-calc" id="calc"></span>
+                <strong class="total-sum" id="total">0 ₽</strong>
+              </div>
+              <p class="error error--box" id="form-error" role="alert"></p>
+              <button class="btn btn-primary btn-block" type="submit" id="submit">Забронировать</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-done" data-view="done" aria-labelledby="done-title" hidden>
+      <div class="narrow narrow--sm">
+        <div class="card done">
+          <div class="park-scene" id="park-scene" aria-hidden="true"></div>
+          <h1 class="rise" style="--d:.55s" id="done-title" tabindex="-1">Место забронировано</h1>
+          <p class="done-sub rise" style="--d:.65s" id="done-sub"></p>
+          <dl class="details rise" style="--d:.75s" id="done-details"></dl>
+          <div class="done-actions rise" style="--d:.85s">
+            <a class="btn btn-primary btn-block" href="#/bookings">Мои брони</a>
+            <a class="btn btn-secondary btn-block" href="#/park">Выбрать ещё место</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-bookings" data-view="bookings" aria-labelledby="bookings-title" hidden>
+      <div class="narrow">
+        <div class="view-head">
+          <h1 id="bookings-title" tabindex="-1">Мои брони</h1>
+          <p class="view-sub" id="bookings-sub"></p>
+        </div>
+        <ul class="bookings" id="booking-list"></ul>
+        <div class="empty" id="bookings-empty">
+          <div class="empty-icon" aria-hidden="true"><svg class="ico"><use href="#i-ticket"/></svg></div>
+          <p class="empty-title">Броней пока нет</p>
+          <p>Выберите место на схеме — бронь появится здесь и сохранится после обновления страницы.</p>
+          <a class="btn btn-primary" href="#/park">Выбрать место</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-tabs" aria-label="Разделы">
+    <a href="#/park" data-tab="park"><svg class="ico" aria-hidden="true"><use href="#i-parking"/></svg>Парковка</a>
+    <a href="#/bookings" data-tab="bookings"><svg class="ico" aria-hidden="true"><use href="#i-ticket"/></svg>Мои брони<b class="count" data-count hidden>0</b></a>
+  </nav>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
